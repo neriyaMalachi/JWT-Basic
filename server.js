@@ -27,6 +27,7 @@ app.post("/login", (req, res) => {
   const token = jwt.sign({ username: user.username }, SECRET, {
     expiresIn: "1h",
   });
+  
 
   res.json({ token });
 });
