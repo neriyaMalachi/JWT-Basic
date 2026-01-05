@@ -1,18 +1,21 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+// cookis
 import cookieParser from "cookie-parser";
-
-const app = express();
-app.use(cookieParser());
-app.use(express.json());
 
 const PORT = 8000;
 const SECRET = "my_super_secret_key";
-
 const users = [
   { username: "dana", password: "1234" },
   { username: "admin", password: "admin" },
 ];
+const app = express();
+app.use(express.json());
+
+// cookis
+app.use(cookieParser());
+
+
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
@@ -25,23 +28,18 @@ app.post("/login", (req, res) => {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  // יצירת JWT
   const token = jwt.sign({ username: user.username }, SECRET, {
     expiresIn: "1h",
   });
-    res.cookie("token", token, {
-    httpOnly: true,
-    secure: false,    // true בפרודקשן
-    sameSite: "strict",
-    maxAge: 60 * 60 * 1000
-  });
+// cookis
+  res.cookie("token", token);
 
   res.json({ token });
 });
 
 function authMiddleware(req, res, next) {
-    console.log(req.cookies.token);
     
+// cookis
   const authHeader = req.cookies.token;
 
   if (!authHeader) {
@@ -49,9 +47,7 @@ function authMiddleware(req, res, next) {
   }
   try {
     const decoded = jwt.verify(authHeader, SECRET);
-    console.log(decoded);
-    
-    req.user = decoded; // שומרים מידע על המשתמש
+    req.user = decoded; 
     next();
   } catch (err) {
     res.status(401).json({ error: "Invalid token" });
