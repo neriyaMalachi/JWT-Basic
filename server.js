@@ -14,21 +14,13 @@ const users = [
 
 app.post("/login", (req, res) => {
   const { username, password } = req.body;
-
   const user = users.find(
     (u) => u.username === username && u.password === password
   );
-
   if (!user) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
-
-  // יצירת JWT
-  const token = jwt.sign({ username: user.username }, SECRET, {
-    expiresIn: "1h",
-  });
-  
-
+  const token = jwt.sign({ username: user.username }, SECRET, {  expiresIn: "1h"});
   res.json({ token });
 });
 
