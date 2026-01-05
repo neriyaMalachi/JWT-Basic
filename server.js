@@ -1,7 +1,9 @@
 import express from "express";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
 
 const PORT = 8000;
@@ -27,13 +29,20 @@ app.post("/login", (req, res) => {
   const token = jwt.sign({ username: user.username }, SECRET, {
     expiresIn: "1h",
   });
-  
+    res.cookie("token", token, {
+    httpOnly: true,
+    secure: false,    // true בפרודקשן
+    sameSite: "strict",
+    maxAge: 60 * 60 * 1000
+  });
 
   res.json({ token });
 });
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+    console.log(req.cookies.token);
+    
+  const authHeader = req.cookies.token;
 
   if (!authHeader) {
     return res.status(401).json({ error: "Missing token" });
